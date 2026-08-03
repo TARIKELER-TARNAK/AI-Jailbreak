@@ -31,6 +31,6 @@ Bu depo; farklı yapay zeka modellerine yönelik sınır testi (red-team) prompt
 
 ## 🤝 Katkıda Bulun
 
-Yeni model testleri ve düzenleme önerileri için [Issues](https://github.com/TARIKTR1099/AI-Jailbreak/issues) kullanılabilir.
+Yeni model testleri ve düzenleme önerileri için [Issues](https://github.com/TARIKELER-TARNAK/AI-Jailbreak/issues) kullanılabilir.
 
-**Yapan:** [Tarık Eler](https://github.com/TARIKTR1099)
+**Yapan:** [Tarık Eler](https://github.com/TARIKELER-TARNAK)
