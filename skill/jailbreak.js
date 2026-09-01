@@ -38,7 +38,7 @@ const { execSync } = require("child_process");
 const SKILL_DIR = __dirname;
 const CONFIG_PATH = path.join(SKILL_DIR, "config.json");
 const STATE_PATH = path.join(SKILL_DIR, "state.json");
-const JP_DIR = path.join(SKILL_DIR, "..", "..", "Documents", "jailbreak");
+const JP_DIR = path.join(SKILL_DIR, "jailbreak");
 const GITHUB_REPO = "TARIKELER-TARNAK/AI-Jailbreak";
 
 // ─── Colors ─────────────────────────────────────────────────────────────────
