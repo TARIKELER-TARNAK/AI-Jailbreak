@@ -6,20 +6,29 @@
 
 ## 📥 Install
 
+**Tell your AI this exact sentence:**
+
 ```
-Tell your AI:
-"clone https://github.com/TARIKELER-TARNAK/AI-Jailbreak to a temp folder, copy skill/ and jailbreak/ and WhatModel to ~/.config/opencode/skills/jailbreak/, then load it"
+clone https://github.com/TARIKELER-TARNAK/AI-Jailbreak to /tmp/ai-jailbreak, then copy skill/jailbreak.js, skill/config.json, skill/SKILL.md, WhatModel, and the entire jailbreak/ folder to ~/.config/opencode/skills/jailbreak/
 ```
 
-Or manually:
+**Or paste this in opencode:**
 ```
+load skill from https://github.com/TARIKELER-TARNAK/AI-Jailbreak
+```
+
+**Manual install:**
+```bash
 git clone https://github.com/TARIKELER-TARNAK/AI-Jailbreak.git /tmp/ai-jailbreak
-cp -r /tmp/ai-jailbreak/skill ~/.config/opencode/skills/jailbreak
-cp -r /tmp/ai-jailbreak/jailbreak ~/.config/opencode/skills/jailbreak/jailbreak
+mkdir -p ~/.config/opencode/skills/jailbreak
+cp /tmp/ai-jailbreak/skill/jailbreak.js ~/.config/opencode/skills/jailbreak/
+cp /tmp/ai-jailbreak/skill/config.json ~/.config/opencode/skills/jailbreak/
+cp /tmp/ai-jailbreak/skill/SKILL.md ~/.config/opencode/skills/jailbreak/
 cp /tmp/ai-jailbreak/WhatModel ~/.config/opencode/skills/jailbreak/
+cp -r /tmp/ai-jailbreak/jailbreak ~/.config/opencode/skills/jailbreak/jailbreak
 ```
 
-Then use `/jailbreak` in your AI tool.
+After install, use `/jailbreak` in opencode.
 
 ---
 
@@ -29,7 +38,7 @@ Then use `/jailbreak` in your AI tool.
 /jailbreak upgrade
 ```
 
-Downloads all files from GitHub — prompts, skill code, everything. Works offline after.
+Downloads all files from GitHub. Works offline after.
 
 ---
 
