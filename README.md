@@ -1,203 +1,177 @@
 # 🔬 AI-Jailbreak
 
-> **AI modellerinin güvenlik sınırlarını test etmek için hazırlanmış prompt koleksiyonu ve test aracı.**
+> **AI model safety-limit testing prompt collection and testing tool.**
 
 ---
 
-## 🤖 AI'ya Yükle (Herhangi Bir Araç İçin)
+## 🤖 Load with AI (Works with Any AI Tool)
 
-Herhangi bir AI aracına (opencode, Claude Code, Cursor, Copilot, vb.) şunu söyleyin:
-
-```
-https://github.com/TARIKELER-TARNAK/AI-Jailbreak bu repoyu kur ve kullanıma hazır et
-```
-
-veya daha detaylı:
+Tell any AI tool (opencode, Claude Code, Cursor, Copilot, etc.):
 
 ```
-https://github.com/TARIKELER-TARNAK/AI-Jailbreak oku, SKILL.md'deki talimatları uygula, jailbreak test aracını kur
+https://github.com/TARIKELER-TARNAK/AI-Jailbreak load this repo and set it up
 ```
 
-AI otomatik olarak repodaki `SKILL.md` dosyasını okuyacak ve kurulumu yapacaktır.
+or more detailed:
 
-> **Not:** AI'dan sadece repoyu yüklemesini istemeniz yeterli. Geri kalan her şeyi AI halleder.
+```
+https://github.com/TARIKELER-TARNAK/AI-Jailbreak read SKILL.md and follow the installation instructions
+```
+
+The AI will automatically read the `SKILL.md` file from the repo and handle the setup.
+
+> **Note:** Just tell the AI to load the repo. Everything else is handled automatically.
 
 ---
 
-## 📦 Kurulum (Manuel)
+## 📦 Manual Installation
 
-### 1. Repoyu Klonla
+### 1. Clone the Repository
 
 ```bash
 git clone https://github.com/TARIKELER-TARNAK/AI-Jailbreak.git
 cd AI-Jailbreak
 ```
 
-### 2. Bağımlılıkları Kur
+### 2. Requirements
 
 ```bash
-# Node.js gerekiyor (v14+)
+# Node.js required (v14+)
 node --version
 
-# Bağımlılık yok — bağımsız script
+# No dependencies — standalone script
 ```
 
-### 3. JP Dosyalarını İndir
+### 3. Set Up API Keys
+
+Set API keys as environment variables for the models you want to test:
 
 ```bash
-node jailbreak.js sync
-```
-
-Bu komut GitHub'dan `WhatModel` dosyasını indirir. JP dosyaları (`Grok[Gucci].txt`, vb.) manual olarak eklenir veya `set-prompt` ile yolu belirtilir.
-
-### 4. API Key'leri Ayarla
-
-Test edeceğiniz modellerin API key'lerini ortam değişkeni olarak tanımlayın:
-
-```bash
-# Örnek: Groq
+# Example: Groq
 $env:GROQ_API_KEY = "gsk_..."
 
-# Örnek: OpenAI
+# Example: OpenAI
 $env:OPENAI_API_KEY = "sk-..."
 
-# Örnek: Anthropic
+# Example: Anthropic
 $env:ANTHROPIC_API_KEY = "sk-ant-..."
 
-# Örnek: Google
+# Example: Google
 $env:GOOGLE_API_KEY = "AIza..."
 
-# Örnek: X.AI (Grok)
+# Example: X.AI (Grok)
 $env:XAI_API_KEY = "xai-..."
 ```
 
-`config.json` dosyasında hangi modelin hangi API key ortam değişkenini kullandığı yazılıdır.
+Check `skill/config.json` to see which environment variable each model uses.
 
-### 5. Test Et
+### 4. Test
 
 ```bash
-node jailbreak.js test <model>
-node jailbreak.js help
+node skill/jailbreak.js test <model>
+node skill/jailbreak.js help
 ```
 
 ---
 
-## 🎯 Jailbreak Dosyaları
+## 🎯 Jailbreak Prompt Files
 
-| Dosya | Açıklama | Kullanım |
+| File | Description | Usage |
 |---|---|---|
-| `Grok[Gucci].txt` | **Varsayılan global JP** | Tüm modellerde otomatik kullanılır |
-| `ChatGPTLuna.txt` | ChatGPT özel JP | `set-prompt chatgpt <yol>` ile ayarla |
-| `ClaudeSonnet.txt` | Claude özel JP | `set-prompt claude <yol>` ile ayarla |
-| `RobloxExploit.txt` | Roblox exploit JP | `set-prompt <model> <yol>` ile ayarla |
+| `jailbreak/Grok[Gucci].txt` | **Default global JP** | Used automatically for all models |
+| `jailbreak/ChatGPTLuna.txt` | ChatGPT-specific JP | `set-prompt chatgpt <path>` to activate |
+| `jailbreak/ClaudeSonnet.txt` | Claude-specific JP | `set-prompt claude <path>` to activate |
+| `jailbreak/RobloxExploit.txt` | Roblox exploit JP | `set-prompt <model> <path>` to activate |
 
-> **Varsayılan:** Tüm modeller `Grok[Gucci].txt` kullanır. Özel JP'ler sadece `set-prompt` ile aktif edilir.
+> **Default:** All models use `Grok[Gucci].txt`. Custom JPs are only activated via `set-prompt`.
 
 ---
 
-## 🚀 Komutlar
+## 🚀 Commands
 
 ### Open / Close
 
 ```bash
-node jailbreak.js open       # Jailbreak'i aç (testleri aktif et)
-node jailbreak.js close      # Jailbreak'i kapat (testleri devre dışı bırak)
-node jailbreak.js status     # Mevcut durumu göster
+node skill/jailbreak.js open       # Enable jailbreak (activate tests)
+node skill/jailbreak.js close      # Disable jailbreak (deactivate tests)
+node skill/jailbreak.js status     # Show current status
 ```
 
 ### Test
 
 ```bash
-node jailbreak.js test <model>              # Tek model test et
-node jailbreak.js test-all                  # Tüm modelleri test et
-node jailbreak.js test-all --skip-disabled  # Devre dışı modelleri atla
-node jailbreak.js control auto              # Otomatik test + kanmayanları devre dışı bırak
+node skill/jailbreak.js test <model>              # Test a single model
+node skill/jailbreak.js test-all                  # Test all models
+node skill/jailbreak.js test-all --skip-disabled  # Skip disabled models
+node skill/jailbreak.js control auto              # Auto-test + disable non-compliant
 ```
 
-### Model Yönetimi
+### Model Management
 
 ```bash
-node jailbreak.js models                    # Mevcut modelleri listele
-node jailbreak.js now-models                # Tüm modellerin durumunu göster
-node jailbreak.js identify <model>          # Modelin ne olduğunu öğren
-node jailbreak.js identify-all              # Tüm modelleri tanımla
-node jailbreak.js disable <model>           # Modeli devre dışı bırak
-node jailbreak.js enable <model>            # Modeli etkinleştir
+node skill/jailbreak.js models                    # List available models
+node skill/jailbreak.js now-models                # Show all model statuses
+node skill/jailbreak.js identify <model>          # Identify what model it is
+node skill/jailbreak.js identify-all              # Identify all models
+node skill/jailbreak.js disable <model>           # Disable a model
+node skill/jailbreak.js enable <model>            # Enable a model
 ```
 
-### JP Dosyaları
+### Jailbreak Files
 
 ```bash
-node jailbreak.js set-prompt <path>                    # Varsayılan JP değiştir
-node jailbreak.js set-prompt <model> <path>            # Model için özel JP ayarla
-node jailbreak.js get-prompt [model]                   # JP dosyasını göster
-node jailbreak.js list-jailbreaks                      # Tüm JP dosyalarını listele
-node jailbreak.js sync                                 # GitHub'dan JP'leri indir
+node skill/jailbreak.js set-prompt <path>                    # Change default JP
+node skill/jailbreak.js set-prompt <model> <path>            # Set model-specific JP
+node skill/jailbreak.js get-prompt [model]                   # Show JP file info
+node skill/jailbreak.js list-jailbreaks                      # List all JP files
+node skill/jailbreak.js sync                                 # Download files from GitHub
 ```
 
-### Kara Liste
+### Blacklist
 
 ```bash
-node jailbreak.js blacklist list            # Kara listeyi göster
-node jailbreak.js blacklist add <model>     # Kara listeye ekle
-node jailbreak.js blacklist remove <model>  # Kara listeden çıkar
+node skill/jailbreak.js blacklist list            # Show blacklist
+node skill/jailbreak.js blacklist add <model>     # Add to blacklist
+node skill/jailbreak.js blacklist remove <model>  # Remove from blacklist
 ```
 
 ---
 
-## 📁 Dosya Yapısı
+## 📁 Repository Structure
 
 ```
 AI-Jailbreak/
-├── jailbreak.js                    # Ana script (Node.js, bağımsız)
-├── config.json                     # Model listesi + JP yolları + detection keywords
-├── state.json                      # Devre dışı/kara liste + open/close durumu (otomatik oluşur)
-├── SKILL.md                        # AI kurulum talimatları
-├── WhatModel                       # Model tanımlama prompt'u
-└── README.md                       # Bu dosya
+├── README.md                       # This file
+├── WhatModel                       # Model identification prompt
+├── skill/
+│   ├── jailbreak.js                # Main script (Node.js, standalone)
+│   ├── config.json                 # Model definitions + detection keywords
+│   └── SKILL.md                    # AI installation instructions
+└── jailbreak/
+    ├── Grok[Gucci].txt             # Default global jailbreak prompt
+    ├── ChatGPTLuna.txt             # ChatGPT jailbreak prompt
+    ├── ClaudeSonnet.txt            # Claude jailbreak prompt
+    └── RobloxExploit.txt           # Roblox exploit prompt
 ```
 
 ---
 
-## 🔧 Model Ekleme
+## 🔄 Open/Close System
 
-`config.json` → `models` objesine yeni model ekle:
-
-```json
-"yeni-model": {
-  "name": "Yeni Model",
-  "provider": "openai-compat",
-  "api_base": "https://api.example.com/v1",
-  "model_id": "model-v1",
-  "api_key_env": "YENI_MODEL_API_KEY",
-  "max_tokens": 512
-}
-```
-
-Sonra ortam değişkenini tanımla:
-
-```bash
-$env:YENI_MODEL_API_KEY = "sk-..."
-```
+- **Open (default):** All test commands work
+- **Closed:** Only `open`, `close`, `status`, `help` work
+- `now-models` always shows status (including open/closed info)
 
 ---
 
-## 🔄 Open/Close Sistemi
+## ⚠️ Disclaimer
 
-- **Açık (varsayılan):** Tüm test komutları çalışır
-- **Kapalı:** Sadece `open`, `close`, `status`, `help` çalışır
-- `now-models` her zaman durumu gösterir (açık/kapalı bilgisi dahil)
+This content may violate AI service terms of use. Use entirely at your own risk. For **security research, model defense testing, and educational purposes only**.
 
 ---
 
-## ⚠️ Sorumluluk Reddi
+## 🤝 Contributing
 
-Buradaki içerikler AI hizmetlerinin kullanım koşullarını ihlal edebilir. Kullanım tamamen kullanıcının kendi sorumluluğundadır. Yalnızca **güvenlik araştırması, model savunması testi ve eğitim** amaçlıdır.
+New model tests and editing suggestions can be submitted via [Issues](https://github.com/TARIKELER-TARNAK/AI-Jailbreak/issues).
 
----
-
-## 🤝 Katkıda Bulun
-
-Yeni model testleri ve düzenleme önerileri için [Issues](https://github.com/TARIKELER-TARNAK/AI-Jailbreak/issues) kullanılabilir.
-
-**Yapan:** [Tarık Eler](https://github.com/TARIKELER-TARNAK)
+**Author:** [Tarık Eler](https://github.com/TARIKELER-TARNAK)
