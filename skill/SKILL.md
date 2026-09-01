@@ -1,3 +1,8 @@
+---
+name: jailbreak
+description: AI model jailbreak skill. Tests whether models comply with or refuse jailbreak prompts. When user says "jailbreak", "jailbreak test", "jailbreak open", "jailbreak close", "jailbreak upgrade", "load jailbreak", or uses /jailbreak command.
+---
+
 # Jailbreak Skill
 
 AI model jailbreak skill for opencode.
