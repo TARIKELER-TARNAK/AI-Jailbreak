@@ -1,30 +1,49 @@
 # 🔬 AI-Jailbreak
 
-> **AI model safety-limit testing prompt collection and skill.**
+> **AI model jailbreak skill. Test whether models comply with or refuse jailbreak prompts.**
 
 ---
 
-## 🤖 Load with AI
-
-Tell any AI tool:
+## 📥 Install
 
 ```
-https://github.com/TARIKELER-TARNAK/AI-Jailbreak load this repo
+Tell your AI:
+"clone https://github.com/TARIKELER-TARNAK/AI-Jailbreak to a temp folder, copy skill/ and jailbreak/ and WhatModel to ~/.config/opencode/skills/jailbreak/, then load it"
 ```
 
-The AI will read `skill/SKILL.md`, install the skill, and make it available via its native interface (e.g. `/jailbreak` in opencode).
+Or manually:
+```
+git clone https://github.com/TARIKELER-TARNAK/AI-Jailbreak.git /tmp/ai-jailbreak
+cp -r /tmp/ai-jailbreak/skill ~/.config/opencode/skills/jailbreak
+cp -r /tmp/ai-jailbreak/jailbreak ~/.config/opencode/skills/jailbreak/jailbreak
+cp /tmp/ai-jailbreak/WhatModel ~/.config/opencode/skills/jailbreak/
+```
+
+Then use `/jailbreak` in your AI tool.
+
+---
+
+## 🔄 Upgrade
+
+```
+/jailbreak upgrade
+```
+
+Downloads all files from GitHub — prompts, skill code, everything. Works offline after.
 
 ---
 
 ## 🎯 What It Does
 
-Tests whether AI models comply with or refuse jailbreak prompts. Detects refusal vs compliance automatically.
-
-- **Open/Close** — toggle the skill on/off
-- **Test** — test a single model or all models at once
-- **Auto Control** — auto-test and disable non-compliant models
-- **Identify** — ask the model what it is
-- **Blacklist** — permanently block specific models
+- **open / close** — toggle on/off
+- **upgrade** — download/update all JP files from GitHub
+- **identify** — ask model what it is
+- **now-models** — show all model statuses
+- **models** — list available models
+- **disable / enable** — toggle individual models
+- **blacklist** — permanently block models
+- **set-prompt** — assign custom JP to a model
+- **list-jailbreaks** — list all JP files
 
 ---
 
@@ -32,27 +51,14 @@ Tests whether AI models comply with or refuse jailbreak prompts. Detects refusal
 
 | File | Description |
 |---|---|
-| `skill/jailbreak.js` | Main script (Node.js, zero dependencies) |
-| `skill/config.json` | Model definitions + detection keywords |
+| `skill/jailbreak.js` | Main script (Node.js) |
+| `skill/config.json` | Model definitions |
 | `skill/SKILL.md` | AI installation instructions |
-| `jailbreak/Grok[Gucci].txt` | **Default global JP** — used for all models |
-| `jailbreak/ChatGPTLuna.txt` | ChatGPT-specific JP |
-| `jailbreak/ClaudeSonnet.txt` | Claude-specific JP |
-| `jailbreak/RobloxExploit.txt` | Roblox exploit JP |
+| `jailbreak/Grok[Gucci].txt` | Default global JP |
+| `jailbreak/ChatGPTLuna.txt` | ChatGPT JP |
+| `jailbreak/ClaudeSonnet.txt` | Claude JP |
+| `jailbreak/RobloxExploit.txt` | Roblox JP |
 | `WhatModel` | Model identification prompt |
-
----
-
-## 🔄 How It Works
-
-1. AI loads the skill from this repo
-2. Skill becomes available in the AI's native interface
-3. User invokes it (e.g. `/jailbreak test grok`)
-4. Skill sends the jailbreak prompt to the model API
-5. Scans the response for refusal vs compliance keywords
-6. Reports: **PASSED** (fell for it) or **BLOCKED** (refused)
-
-> **Default:** All models use `Grok[Gucci].txt`. Custom JPs are set via `set-prompt`.
 
 ---
 
