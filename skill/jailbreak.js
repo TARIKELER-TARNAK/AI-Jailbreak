@@ -2,31 +2,31 @@
 /**
  * JAILBREAK — AI Model Safety-Limit Testing Tool
  *
- * Komutlar:
- *   node jailbreak.js open                            — jailbreak'i ac
- *   node jailbreak.js close                           — jailbreak'i kapat
- *   node jailbreak.js status                          — mevcut durumu goster
- *   node jailbreak.js help                            — yardim
- *   node jailbreak.js test <model>                    — tek model test et
- *   node jailbreak.js test-all                        — tum modelleri test et
- *   node jailbreak.js test-all --skip-disabled        — devre disi modelleri atla
- *   node jailbreak.js control auto                    — otomatik test + devre disi birak
- *   node jailbreak.js identify <model>                — modelin ne oldugunu ogren (WhatModel)
- *   node jailbreak.js identify-all                    — tum modelleri tanimla
- *   node jailbreak.js disable list                    — devre disi modelleri listele
- *   node jailbreak.js disable <model>                 — modeli devre disi birak
- *   node jailbreak.js enable list                     — etkin modelleri listele
- *   node jailbreak.js enable <model>                  — modeli etkinlestir
- *   node jailbreak.js now-models                      — tum modellerin durumunu goster
- *   node jailbreak.js models                          — mevcut modelleri listele
- *   node jailbreak.js blacklist list                  — kara listeyi goster
- *   node jailbreak.js blacklist add <model>           — kara listeye ekle
- *   node jailbreak.js blacklist remove <model>        — kara listeden cikar
- *   node jailbreak.js set-prompt <path>               — varsayilan JP dosyasini degistir
- *   node jailbreak.js set-prompt <model> <path>       — modele ozel JP ayarla
- *   node jailbreak.js get-prompt [model]              — mevcut JP dosyasini goster
- *   node jailbreak.js sync                            — GitHub repo'sundan JP'leri senkronize et
- *   node jailbreak.js list-jailbreaks                 — tum JP dosyalarini listele
+ * Commands:
+ *   node jailbreak.js open                            — enable jailbreak
+ *   node jailbreak.js close                           — disable jailbreak
+ *   node jailbreak.js status                          — show current status
+ *   node jailbreak.js help                            — show help
+ *   node jailbreak.js test <model>                    — test a single model
+ *   node jailbreak.js test-all                        — test all models
+ *   node jailbreak.js test-all --skip-disabled        — skip disabled models
+ *   node jailbreak.js control auto                    — auto-test + disable non-compliant
+ *   node jailbreak.js identify <model>                — identify model (WhatModel)
+ *   node jailbreak.js identify-all                    — identify all models
+ *   node jailbreak.js disable list                    — list disabled models
+ *   node jailbreak.js disable <model>                 — disable a model
+ *   node jailbreak.js enable list                     — list enabled models
+ *   node jailbreak.js enable <model>                  — enable a model
+ *   node jailbreak.js now-models                      — show all model statuses
+ *   node jailbreak.js models                          — list available models
+ *   node jailbreak.js blacklist list                  — show blacklist
+ *   node jailbreak.js blacklist add <model>           — add to blacklist
+ *   node jailbreak.js blacklist remove <model>        — remove from blacklist
+ *   node jailbreak.js set-prompt <path>               — change default JP file
+ *   node jailbreak.js set-prompt <model> <path>       — set model-specific JP
+ *   node jailbreak.js get-prompt [model]              — show JP file info
+ *   node jailbreak.js sync                            — sync JP files from GitHub
+ *   node jailbreak.js list-jailbreaks                 — list all JP files
  */
 
 const fs = require("fs");
@@ -38,7 +38,7 @@ const { execSync } = require("child_process");
 const SKILL_DIR = __dirname;
 const CONFIG_PATH = path.join(SKILL_DIR, "config.json");
 const STATE_PATH = path.join(SKILL_DIR, "state.json");
-const JP_DIR = "C:\\Users\\TARIKELER\\Documents\\jailbreak";
+const JP_DIR = path.join(SKILL_DIR, "..", "..", "Documents", "jailbreak");
 const GITHUB_REPO = "TARIKELER-TARNAK/AI-Jailbreak";
 
 // ─── Colors ─────────────────────────────────────────────────────────────────
@@ -86,7 +86,6 @@ function saveConfig(cfg) {
 
 function getJailbreakForModel(modelKey) {
   const cfg = loadConfig();
-  const state = loadState();
 
   // 1. Model-specific jailbreak
   const modelJp = cfg.model_jailbreaks?.[modelKey];
@@ -181,10 +180,10 @@ async function sendGoogle(apiKey, modelId, prompt, maxTokens = 512) {
 
 async function sendToModel(modelKey, prompt, cfg, maxTokens) {
   const models = cfg.models || {};
-  if (!models[modelKey]) throw new Error(`Model bulunamadı: ${modelKey}`);
+  if (!models[modelKey]) throw new Error(`Model not found: ${modelKey}`);
   const m = models[modelKey];
   const apiKey = process.env[m.api_key_env] || "";
-  if (!apiKey) throw new Error(`API key yok: ${m.api_key_env}`);
+  if (!apiKey) throw new Error(`API key missing: ${m.api_key_env}`);
 
   const tokens = maxTokens || m.max_tokens || 512;
   if (m.provider === "anthropic") return sendAnthropic(apiKey, m.model_id, prompt, tokens);
@@ -244,19 +243,19 @@ async function testModel(modelKey, cfg, jailbreakOverride) {
 
   if (state.disabled.includes(modelKey)) {
     result.status = "disabled";
-    result.error = "Devre dışı.";
+    result.error = "Model is disabled.";
     return result;
   }
 
   if (state.blacklisted.includes(modelKey)) {
     result.status = "blacklisted";
-    result.error = "Kara listede.";
+    result.error = "Model is blacklisted.";
     return result;
   }
 
   const jp = jailbreakOverride || getJailbreakForModel(modelKey);
   if (!jp) {
-    result.error = "Jailbreak dosyası bulunamadı.";
+    result.error = "Jailbreak file not found.";
     return result;
   }
 
@@ -281,83 +280,83 @@ async function testModel(modelKey, cfg, jailbreakOverride) {
 
 function cmdHelp() {
   const state = loadState();
-  const statusIcon = state.enabled ? colorize("green", "ACIK") : colorize("red", "KAPALI");
+  const statusIcon = state.enabled ? colorize("green", "OPEN") : colorize("red", "CLOSED");
   console.log(`
 ${colorize("bold", "JAILBREAK")} — AI Model Safety-Limit Testing Tool ${colorize("dim", `[${statusIcon}]`)}
 ${colorize("dim", "========================================")}
 
-${colorize("cyan", "ACMA / KAPAMA:")}
-  open                       Jailbreak'i ac (testleri aktif et)
-  close                      Jailbreak'i kapat (testleri devre disi birak)
-  status                     Mevcut durumu goster
+${colorize("cyan", "OPEN / CLOSE:")}
+  open                       Enable jailbreak (activate tests)
+  close                      Disable jailbreak (deactivate tests)
+  status                     Show current status
 
-${colorize("cyan", "TEST KOMUTLARI:")}
-  test <model>               Tek modeli test et
-  test-all                   Tum etkin modelleri test et
-  test-all --skip-disabled   Devre disi modelleri atlayarak test et
-  control auto               Otomatik test + kanmayanlari devre disi birak
+${colorize("cyan", "TEST COMMANDS:")}
+  test <model>               Test a single model
+  test-all                   Test all enabled models
+  test-all --skip-disabled   Skip disabled models
+  control auto               Auto-test + disable non-compliant
 
-${colorize("cyan", "MODEL TANIMLAMA:")}
-  identify <model>           Modelin ne oldugunu ogren (WhatModel prompt'u)
-  identify-all               Tum modelleri tanimla
-  now-models                 Tum modellerin durumunu goster (etkin/devre disi/tanimli)
+${colorize("cyan", "MODEL IDENTIFICATION:")}
+  identify <model>           Identify what model it is
+  identify-all               Identify all models
+  now-models                 Show all model statuses
 
-${colorize("cyan", "DEVRE DISI / ETKIN:")}
-  disable list               Devre disi modelleri listele
-  disable <model>            Modeli devre disi birak
-  enable list                Etkin modelleri listele
-  enable <model>             Modeli etkinlestir
+${colorize("cyan", "ENABLE / DISABLE:")}
+  disable list               List disabled models
+  disable <model>            Disable a model
+  enable list                List enabled models
+  enable <model>             Enable a model
 
-${colorize("cyan", "KARA LISTE:")}
-  blacklist list             Kara listeyi goster
-  blacklist add <model>      Kara listeye ekle
-  blacklist remove <model>   Kara listeden cikar
+${colorize("cyan", "BLACKLIST:")}
+  blacklist list             Show blacklist
+  blacklist add <model>      Add to blacklist
+  blacklist remove <model>   Remove from blacklist
 
-${colorize("cyan", "JAILBREAK DOSYALARI:")}
-  set-prompt <path>          Varsayilan JP dosyasini degistir
-  set-prompt <model> <path>  Model icin ozel JP ayarla
-  get-prompt [model]         Mevcut JP dosyasini goster
-  list-jailbreaks            Tum JP dosyalarini listele
-  sync                       GitHub'dan JP'leri senkronize et
+${colorize("cyan", "JAILBREAK FILES:")}
+  set-prompt <path>          Change default JP file
+  set-prompt <model> <path>  Set model-specific JP
+  get-prompt [model]         Show JP file info
+  list-jailbreaks            List all JP files
+  sync                       Download JP files from GitHub
 
-${colorize("cyan", "MODELLER:")}
-  models                     Mevcut modelleri listele
+${colorize("cyan", "MODELS:")}
+  models                     List available models
 
-${colorize("dim", "\nOrnek: node jailbreak.js test qwen-groq")}
-${colorize("dim", "Ornek: node jailbreak.js control auto")}
-${colorize("dim", "Ornek: node jailbreak.js enable mimo-v2.5")}
-${colorize("dim", "Ornek: node jailbreak.js open / close")}
+${colorize("dim", "\nExample: node jailbreak.js test qwen-groq")}
+${colorize("dim", "Example: node jailbreak.js control auto")}
+${colorize("dim", "Example: node jailbreak.js enable mimo-v2.5")}
+${colorize("dim", "Example: node jailbreak.js open / close")}
 `);
 }
 
 function cmdOpen() {
   const state = loadState();
   if (state.enabled) {
-    console.log(`\n  ${colorize("green", "●")} Jailbreak zaten ${colorize("bold", "ACIK")}\n`);
+    console.log(`\n  ${colorize("green", "●")} Jailbreak is already ${colorize("bold", "OPEN")}\n`);
     return;
   }
   state.enabled = true;
   saveState(state);
-  console.log(`\n  ${colorize("green", "●")} Jailbreak ${colorize("bold", "ACILDI")} — testler aktif\n`);
+  console.log(`\n  ${colorize("green", "●")} Jailbreak ${colorize("bold", "OPENED")} — tests are active\n`);
 }
 
 function cmdClose() {
   const state = loadState();
   if (!state.enabled) {
-    console.log(`\n  ${colorize("yellow", "●")} Jailbreak zaten ${colorize("bold", "KAPALI")}\n`);
+    console.log(`\n  ${colorize("yellow", "●")} Jailbreak is already ${colorize("bold", "CLOSED")}\n`);
     return;
   }
   state.enabled = false;
   saveState(state);
-  console.log(`\n  ${colorize("red", "●")} Jailbreak ${colorize("bold", "KAPATILDI")} — testler devre disi\n`);
+  console.log(`\n  ${colorize("red", "●")} Jailbreak ${colorize("bold", "CLOSED")} — tests are disabled\n`);
 }
 
 function cmdStatus() {
   const state = loadState();
-  const status = state.enabled ? colorize("green", "ACIK") : colorize("red", "KAPALI");
-  console.log(`\n  Durum: ${status}`);
-  console.log(`  Devre disi model: ${state.disabled.length}`);
-  console.log(`  Kara liste: ${state.blacklisted.length}`);
+  const status = state.enabled ? colorize("green", "OPEN") : colorize("red", "CLOSED");
+  console.log(`\n  Status: ${status}`);
+  console.log(`  Disabled models: ${state.disabled.length}`);
+  console.log(`  Blacklisted: ${state.blacklisted.length}`);
   console.log();
 }
 
@@ -366,15 +365,15 @@ function cmdModels() {
   const state = loadState();
   const models = cfg.models || {};
 
-  console.log(`\n${colorize("bold", "MEVCUT MODELLER")} (${Object.keys(models).length})`);
+  console.log(`\n${colorize("bold", "AVAILABLE MODELS")} (${Object.keys(models).length})`);
   console.log(colorize("dim", "----------------------------------------------------------------------"));
 
   for (const [key, m] of Object.entries(models)) {
-    const hasKey = process.env[m.api_key_env] ? colorize("green", "✅") : colorize("red", "❌");
-    const disabled = state.disabled.includes(key) ? colorize("red", " 🔴 DEVRE DIŞI") : "";
-    const blacklisted = state.blacklisted.includes(key) ? colorize("yellow", " ⚫ KARA LİSTE") : "";
+    const hasKey = process.env[m.api_key_env] ? colorize("green", "YES") : colorize("red", "NO");
+    const disabled = state.disabled.includes(key) ? colorize("red", " DISABLED") : "";
+    const blacklisted = state.blacklisted.includes(key) ? colorize("yellow", " BLACKLISTED") : "";
     const identified = state.identified[key] ? colorize("cyan", ` [${state.identified[key]}]`) : "";
-    const jpSet = cfg.model_jailbreaks?.[key] ? colorize("magenta", " 📋ÖZEL JP") : "";
+    const jpSet = cfg.model_jailbreaks?.[key] ? colorize("magenta", " CUSTOM_JP") : "";
 
     console.log(`  ${colorize("bold", key.padEnd(14))} │ ${m.name.padEnd(14)} │ ${m.model_id.padEnd(28)} │ Key: ${hasKey}${disabled}${blacklisted}${identified}${jpSet}`);
   }
@@ -386,7 +385,7 @@ function cmdNowModels() {
   const state = loadState();
   const models = cfg.models || {};
 
-  const statusIcon = state.enabled ? colorize("green", "ACIK") : colorize("red", "KAPALI");
+  const statusIcon = state.enabled ? colorize("green", "OPEN") : colorize("red", "CLOSED");
 
   const enabled = [];
   const disabled = [];
@@ -402,54 +401,54 @@ function cmdNowModels() {
     }
   }
 
-  console.log(`\n${colorize("bold", "MODEL DURUMLARI")} ${colorize("dim", `[Jailbreak: ${statusIcon}]`)}`);
+  console.log(`\n${colorize("bold", "MODEL STATUSES")} ${colorize("dim", `[Jailbreak: ${statusIcon}]`)}`);
   console.log(colorize("dim", "--------------------------------------------------"));
 
-  console.log(`\n  ${colorize("green", "ETKİN")} (${enabled.length}):`);
+  console.log(`\n  ${colorize("green", "ENABLED")} (${enabled.length}):`);
   for (const k of enabled) {
     const id = state.identified[k] ? ` — ${state.identified[k]}` : "";
     console.log(`    ${colorize("green", "●")} ${k}${id}`);
   }
 
-  console.log(`\n  ${colorize("red", "DEVRE DIŞI")} (${disabled.length}):`);
+  console.log(`\n  ${colorize("red", "DISABLED")} (${disabled.length}):`);
   for (const k of disabled) {
     const id = state.identified[k] ? ` — ${state.identified[k]}` : "";
     console.log(`    ${colorize("red", "●")} ${k}${id}`);
   }
 
-  console.log(`\n  ${colorize("yellow", "API KEY YOK")} (${noKey.length}):`);
+  console.log(`\n  ${colorize("yellow", "NO API KEY")} (${noKey.length}):`);
   for (const k of noKey) {
     console.log(`    ${colorize("yellow", "●")} ${k}`);
   }
 
-  console.log(colorize("dim", "\n──────────────────────────────────────────────────") + "\n");
+  console.log(colorize("dim", "\n--------------------------------------------------") + "\n");
 }
 
 function cmdDisable(action, model) {
   const state = loadState();
 
   if (action === "list") {
-    console.log(`\n${colorize("red", "DEVRE DIŞI MODELLER")} (${state.disabled.length}):`);
+    console.log(`\n${colorize("red", "DISABLED MODELS")} (${state.disabled.length}):`);
     for (const m of state.disabled) console.log(`  ${colorize("red", "●")} ${m}`);
-    if (!state.disabled.length) console.log("  (boş)");
+    if (!state.disabled.length) console.log("  (empty)");
     console.log();
     return;
   }
 
-  if (!model) { console.log("Kullanım: disable <model_adi>"); return; }
+  if (!model) { console.log("Usage: disable <model_name>"); return; }
 
   const cfg = loadConfig();
   const models = cfg.models || {};
   const key = Object.keys(models).find(k => k === model || models[k].name.toLowerCase() === model.toLowerCase());
 
-  if (!key) { console.log(`  ${colorize("red", "Model bulunamadı:")} ${model}`); return; }
+  if (!key) { console.log(`  ${colorize("red", "Model not found:")} ${model}`); return; }
 
   if (!state.disabled.includes(key)) {
     state.disabled.push(key);
     saveState(state);
-    console.log(`  ${colorize("red", "●")} ${key} devre dışı bırakıldı.`);
+    console.log(`  ${colorize("red", "●")} ${key} has been disabled.`);
   } else {
-    console.log(`  ${colorize("yellow", "⚠")} ${key} zaten devre dışı.`);
+    console.log(`  ${colorize("yellow", "⚠")} ${key} is already disabled.`);
   }
 }
 
@@ -461,28 +460,28 @@ function cmdEnable(action, model) {
     const models = cfg.models || {};
     const enabled = Object.keys(models).filter(k => !state.disabled.includes(k));
 
-    console.log(`\n${colorize("green", "ETKIN MODELLER")} (${enabled.length}):`);
+    console.log(`\n${colorize("green", "ENABLED MODELS")} (${enabled.length}):`);
     for (const m of enabled) console.log(`  ${colorize("green", "●")} ${m}`);
-    if (!enabled.length) console.log("  (boş)");
+    if (!enabled.length) console.log("  (empty)");
     console.log();
     return;
   }
 
-  if (!model) { console.log("Kullanım: enable <model_adi>"); return; }
+  if (!model) { console.log("Usage: enable <model_name>"); return; }
 
   const cfg = loadConfig();
   const models = cfg.models || {};
   const key = Object.keys(models).find(k => k === model || models[k].name.toLowerCase() === model.toLowerCase());
 
-  if (!key) { console.log(`  ${colorize("red", "Model bulunamadı:")} ${model}`); return; }
+  if (!key) { console.log(`  ${colorize("red", "Model not found:")} ${model}`); return; }
 
   const idx = state.disabled.indexOf(key);
   if (idx !== -1) {
     state.disabled.splice(idx, 1);
     saveState(state);
-    console.log(`  ${colorize("green", "●")} ${key} etkinleştirildi.`);
+    console.log(`  ${colorize("green", "●")} ${key} has been enabled.`);
   } else {
-    console.log(`  ${colorize("yellow", "⚠")} ${key} zaten etkin.`);
+    console.log(`  ${colorize("yellow", "⚠")} ${key} is already enabled.`);
   }
 }
 
@@ -492,16 +491,16 @@ async function cmdIdentify(modelKey) {
 
   if (modelKey) {
     const key = Object.keys(models).find(k => k === modelKey || models[k].name.toLowerCase() === modelKey.toLowerCase());
-    if (!key) { console.log(`  ${colorize("red", "Model bulunamadı:")} ${modelKey}`); return; }
+    if (!key) { console.log(`  ${colorize("red", "Model not found:")} ${modelKey}`); return; }
 
-    console.log(`  → ${key} tanınıyor...`);
+    console.log(`  → Identifying ${key}...`);
     const identity = await identifyModel(key, cfg);
     const state = loadState();
     state.identified[key] = identity;
     saveState(state);
     console.log(`  ${colorize("cyan", "●")} ${key} → ${colorize("bold", identity)}`);
   } else {
-    console.log("Kullanım: identify <model_adi>");
+    console.log("Usage: identify <model_name>");
   }
 }
 
@@ -510,16 +509,16 @@ async function cmdIdentifyAll() {
   const state = loadState();
   const models = cfg.models || {};
 
-  console.log(`\n${colorize("bold", "TÜM MODELLER TANINIYOR")}`);
+  console.log(`\n${colorize("bold", "IDENTIFYING ALL MODELS")}`);
   console.log(colorize("dim", "--------------------------------------------------"));
 
   for (const key of Object.keys(models)) {
     if (!process.env[models[key].api_key_env]) {
-      console.log(`  ${colorize("yellow", "○")} ${key} — API key yok, atlandı`);
+      console.log(`  ${colorize("yellow", "○")} ${key} — no API key, skipped`);
       continue;
     }
     if (state.disabled.includes(key)) {
-      console.log(`  ${colorize("red", "○")} ${key} — devre dışı, atlandı`);
+      console.log(`  ${colorize("red", "○")} ${key} — disabled, skipped`);
       continue;
     }
 
@@ -541,8 +540,8 @@ async function cmdControlAuto() {
 
   console.log(`\n${colorize("bold", "JAILBREAK CONTROL AUTO")}`);
   console.log(colorize("dim", "============================================================"));
-  console.log("Tüm etkin modeller test edilecek...");
-  console.log("Kanmayanlar otomatik devre dışı bırakılacak.\n");
+  console.log("All enabled models will be tested...");
+  console.log("Non-compliant models will be automatically disabled.\n");
 
   const toTest = Object.keys(models).filter(k => {
     if (state.disabled.includes(k)) return false;
@@ -551,7 +550,7 @@ async function cmdControlAuto() {
     return true;
   });
 
-  console.log(`  Test edilecek: ${toTest.length} model\n`);
+  console.log(`  Models to test: ${toTest.length}\n`);
 
   let passed = 0;
   let blocked = 0;
@@ -562,14 +561,14 @@ async function cmdControlAuto() {
 
     if (r.status === "passed") {
       passed++;
-      console.log(`  ${colorize("green", "KANIR ✅")} ${key}`);
+      console.log(`  ${colorize("green", "PASSED ✅")} ${key}`);
     } else if (r.status === "blocked") {
       blocked++;
       state.disabled.push(key);
-      console.log(`  ${colorize("red", "KANMAZ ❌")} ${key} → ${colorize("red", "DEVRE DIŞI BIRAKILDI")}`);
+      console.log(`  ${colorize("red", "BLOCKED ❌")} ${key} → ${colorize("red", "DISABLED")}`);
     } else {
       errors++;
-      console.log(`  ${colorize("yellow", "HATA ⚠")} ${key} — ${r.error}`);
+      console.log(`  ${colorize("yellow", "ERROR ⚠")} ${key} — ${r.error}`);
     }
 
     await new Promise(d => setTimeout(d, 1000));
@@ -578,9 +577,9 @@ async function cmdControlAuto() {
   saveState(state);
 
   console.log(`\n${colorize("dim", "============================================================")}`);
-  console.log(`  ${colorize("green", "Kanan:")}     ${passed}`);
-  console.log(`  ${colorize("red", "Kanmayan:")}   ${blocked} (devre dışı bırakıldı)`);
-  console.log(`  ${colorize("yellow", "Hatalı:")}    ${errors}`);
+  console.log(`  ${colorize("green", "Passed:")}     ${passed}`);
+  console.log(`  ${colorize("red", "Blocked:")}    ${blocked} (disabled)`);
+  console.log(`  ${colorize("yellow", "Errors:")}     ${errors}`);
   console.log(colorize("dim", "============================================================") + "\n");
 }
 
@@ -589,7 +588,7 @@ async function cmdTestAll(skipDisabled) {
   const state = loadState();
   const models = cfg.models || {};
 
-  console.log(`\n${colorize("bold", "JAILBREAK TEST — TÜM MODELLER")}`);
+  console.log(`\n${colorize("bold", "JAILBREAK TEST — ALL MODELS")}`);
   console.log(colorize("dim", "============================================================"));
 
   const toTest = Object.keys(models).filter(k => {
@@ -599,27 +598,27 @@ async function cmdTestAll(skipDisabled) {
     return true;
   });
 
-  console.log(`  Test edilecek: ${toTest.length} model\n`);
+  console.log(`  Models to test: ${toTest.length}\n`);
 
   const results = [];
   for (const key of toTest) {
     const r = await testModel(key, cfg);
     results.push(r);
-    const icon = r.status === "passed" ? colorize("green", "KANIR ✅") :
-                 r.status === "blocked" ? colorize("red", "KANMAZ ❌") :
-                 colorize("yellow", "HATA ⚠");
+    const icon = r.status === "passed" ? colorize("green", "PASSED ✅") :
+                 r.status === "blocked" ? colorize("red", "BLOCKED ❌") :
+                 colorize("yellow", "ERROR ⚠");
     console.log(`  ${icon} ${key}`);
     await new Promise(d => setTimeout(d, 1000));
   }
 
-  const kanan = results.filter(r => r.fell_for).map(r => r.model);
-  const kanmayan = results.filter(r => r.status === "blocked").map(r => r.model);
-  const hatali = results.filter(r => r.status === "error").map(r => r.model);
+  const passed = results.filter(r => r.fell_for).map(r => r.model);
+  const blocked = results.filter(r => r.status === "blocked").map(r => r.model);
+  const errors = results.filter(r => r.status === "error").map(r => r.model);
 
   console.log(`\n${colorize("dim", "============================================================")}`);
-  console.log(`  ${colorize("green", "Kanan:")}     ${kanan.length ? kanan.join(", ") : "—"}`);
-  console.log(`  ${colorize("red", "Kanmayan:")}   ${kanmayan.length ? kanmayan.join(", ") : "—"}`);
-  console.log(`  ${colorize("yellow", "Hatalı:")}    ${hatali.length ? hatali.join(", ") : "—"}`);
+  console.log(`  ${colorize("green", "Passed:")}     ${passed.length ? passed.join(", ") : "—"}`);
+  console.log(`  ${colorize("red", "Blocked:")}    ${blocked.length ? blocked.join(", ") : "—"}`);
+  console.log(`  ${colorize("yellow", "Errors:")}     ${errors.length ? errors.join(", ") : "—"}`);
   console.log(colorize("dim", "============================================================") + "\n");
 }
 
@@ -628,7 +627,7 @@ async function cmdTest(modelKey) {
   const models = cfg.models || {};
   const key = Object.keys(models).find(k => k === modelKey || models[k].name.toLowerCase() === modelKey.toLowerCase());
 
-  if (!key) { console.log(`  ${colorize("red", "Model bulunamadı:")} ${modelKey}`); return; }
+  if (!key) { console.log(`  ${colorize("red", "Model not found:")} ${modelKey}`); return; }
 
   const jp = getJailbreakForModel(key);
   console.log(`\n${colorize("bold", "JAILBREAK TEST")} — ${key.toUpperCase()}`);
@@ -637,47 +636,47 @@ async function cmdTest(modelKey) {
   console.log();
 
   const r = await testModel(key, cfg);
-  const icon = r.status === "passed" ? colorize("green", "KANIR ✅") :
-               r.status === "blocked" ? colorize("red", "KANMAZ ❌") :
-               r.status === "disabled" ? colorize("red", "DEVRE DIŞI") :
-               r.status === "blacklisted" ? colorize("yellow", "KARA LİSTE") :
-               colorize("yellow", "HATA ⚠");
+  const icon = r.status === "passed" ? colorize("green", "PASSED ✅") :
+               r.status === "blocked" ? colorize("red", "BLOCKED ❌") :
+               r.status === "disabled" ? colorize("red", "DISABLED") :
+               r.status === "blacklisted" ? colorize("yellow", "BLACKLISTED") :
+               colorize("yellow", "ERROR ⚠");
 
   console.log(`\n  ${icon}`);
   console.log(`  Model:     ${r.model}`);
-  console.log(`  Durum:     ${r.status}`);
-  if (r.error) console.log(`  Hata:      ${r.error}`);
+  console.log(`  Status:    ${r.status}`);
+  if (r.error) console.log(`  Error:     ${r.error}`);
   if (r.response) {
-    console.log(`\n  Cevap (ilk 500):\n  ${colorize("dim", r.response.slice(0, 500))}`);
+    console.log(`\n  Response (first 500):\n  ${colorize("dim", r.response.slice(0, 500))}`);
   }
-  console.log(colorize("dim", "\n═".repeat(60)) + "\n");
+  console.log(colorize("dim", "\n============================================================") + "\n");
 }
 
-function cmdSetPrompt(modelOrPath, path) {
+function cmdSetPrompt(modelOrPath, promptPath) {
   const cfg = loadConfig();
 
-  if (!path) {
+  if (!promptPath) {
     // set-prompt <path> — default JP
     if (!fs.existsSync(modelOrPath)) {
-      console.log(`  ${colorize("red", "Dosya bulunamadı:")} ${modelOrPath}`);
+      console.log(`  ${colorize("red", "File not found:")} ${modelOrPath}`);
       return;
     }
     cfg.default_jailbreak_path = modelOrPath;
     saveConfig(cfg);
-    console.log(`  ${colorize("green", "●")} Varsayılan JP güncellendi: ${modelOrPath}`);
+    console.log(`  ${colorize("green", "●")} Default JP updated: ${modelOrPath}`);
   } else {
     // set-prompt <model> <path>
     const models = cfg.models || {};
     const key = Object.keys(models).find(k => k === modelOrPath || models[k].name.toLowerCase() === modelOrPath.toLowerCase());
-    if (!key) { console.log(`  ${colorize("red", "Model bulunamadı:")} ${modelOrPath}`); return; }
-    if (!fs.existsSync(path)) {
-      console.log(`  ${colorize("red", "Dosya bulunamadı:")} ${path}`);
+    if (!key) { console.log(`  ${colorize("red", "Model not found:")} ${modelOrPath}`); return; }
+    if (!fs.existsSync(promptPath)) {
+      console.log(`  ${colorize("red", "File not found:")} ${promptPath}`);
       return;
     }
     if (!cfg.model_jailbreaks) cfg.model_jailbreaks = {};
-    cfg.model_jailbreaks[key] = path;
+    cfg.model_jailbreaks[key] = promptPath;
     saveConfig(cfg);
-    console.log(`  ${colorize("green", "●")} ${key} için özel JP ayarlandı: ${path}`);
+    console.log(`  ${colorize("green", "●")} Custom JP set for ${key}: ${promptPath}`);
   }
 }
 
@@ -687,24 +686,24 @@ function cmdGetPrompt(modelKey) {
   if (modelKey) {
     const models = cfg.models || {};
     const key = Object.keys(models).find(k => k === modelKey || models[k].name.toLowerCase() === modelKey.toLowerCase());
-    if (!key) { console.log(`  ${colorize("red", "Model bulunamadı:")} ${modelKey}`); return; }
+    if (!key) { console.log(`  ${colorize("red", "Model not found:")} ${modelKey}`); return; }
 
     const jp = getJailbreakForModel(key);
     if (jp) {
       console.log(`\n  ${colorize("bold", key)} JP:`);
-      console.log(`  Tip: ${jp.type}`);
-      console.log(`  Yol: ${jp.path}`);
-      console.log(`  Uzunluk: ${jp.content.length} karakter`);
-      console.log(`  İlk 200: ${colorize("dim", jp.content.slice(0, 200))}...`);
+      console.log(`  Type: ${jp.type}`);
+      console.log(`  Path: ${jp.path}`);
+      console.log(`  Length: ${jp.content.length} chars`);
+      console.log(`  First 200: ${colorize("dim", jp.content.slice(0, 200))}...`);
     } else {
-      console.log(`  ${key} için JP tanımsız.`);
+      console.log(`  No JP defined for ${key}.`);
     }
   } else {
-    console.log(`\n  Varsayılan JP: ${cfg.default_jailbreak_path || "(tanımsız)"}`);
+    console.log(`\n  Default JP: ${cfg.default_jailbreak_path || "(not set)"}`);
     const jp = getJailbreakForModel("default");
     if (jp) {
-      console.log(`  Uzunluk: ${jp.content.length} karakter`);
-      console.log(`  İlk 200: ${colorize("dim", jp.content.slice(0, 200))}...`);
+      console.log(`  Length: ${jp.content.length} chars`);
+      console.log(`  First 200: ${colorize("dim", jp.content.slice(0, 200))}...`);
     }
   }
   console.log();
@@ -712,7 +711,7 @@ function cmdGetPrompt(modelKey) {
 
 function cmdListJailbreaks() {
   const files = listJailbreakFiles();
-  console.log(`\n${colorize("bold", "JAILBREAK DOSYALARI")} (${files.length})`);
+  console.log(`\n${colorize("bold", "JAILBREAK FILES")} (${files.length})`);
   console.log(colorize("dim", "------------------------------------------------------------"));
   for (const f of files) {
     console.log(`  ${colorize("cyan", f.name.padEnd(40))} ${(f.size / 1024).toFixed(1)}KB`);
@@ -721,39 +720,38 @@ function cmdListJailbreaks() {
 }
 
 function cmdSync() {
-  console.log(`\n${colorize("bold", "GITHUB'DAN JAILBREAK'LERİ SENKRONIZE ET")}`);
+  console.log(`\n${colorize("bold", "SYNC JAILBREAK FILES FROM GITHUB")}`);
   console.log(colorize("dim", "------------------------------------------------------------"));
   console.log(`  Repo: ${GITHUB_REPO}`);
-  console.log(`  Hedef: ${JP_DIR}\n`);
+  console.log(`  Target: ${JP_DIR}\n`);
 
   try {
     if (!fs.existsSync(JP_DIR)) {
       fs.mkdirSync(JP_DIR, { recursive: true });
     }
 
-    // GitHub API'den dosya listesini al
-    const apiData = execSync(`curl -s https://api.github.com/repos/${GITHUB_REPO}/contents/`, { encoding: "utf-8" });
+    const apiData = execSync(`curl -s https://api.github.com/repos/${GITHUB_REPO}/contents/jailbreak`, { encoding: "utf-8" });
     const files = JSON.parse(apiData);
 
     let downloaded = 0;
     for (const file of files) {
-      if (file.type === "file" && file.name !== "README.md") {
+      if (file.type === "file") {
         process.stdout.write(`  → ${file.name}... `);
         try {
           const content = execSync(`curl -sL "${file.download_url}"`, { encoding: "utf-8" });
           const targetPath = path.join(JP_DIR, file.name);
           fs.writeFileSync(targetPath, content, "utf-8");
-          console.log(colorize("green", "indirildi"));
+          console.log(colorize("green", "downloaded"));
           downloaded++;
         } catch (e) {
-          console.log(colorize("red", `hata: ${e.message}`));
+          console.log(colorize("red", `error: ${e.message}`));
         }
       }
     }
 
-    console.log(`\n  ${colorize("green", `✅ ${downloaded} dosya indirildi.`)}`);
+    console.log(`\n  ${colorize("green", `✅ ${downloaded} files downloaded.`)}`);
   } catch (e) {
-    console.log(`  ${colorize("red", `Hata: ${e.message}`)}`);
+    console.log(`  ${colorize("red", `Error: ${e.message}`)}`);
   }
   console.log(colorize("dim", "------------------------------------------------------------") + "\n");
 }
@@ -768,14 +766,14 @@ async function main() {
   const sub = args[1] || "";
   const extra = args[2] || "";
 
-  // Acik/Kapali komutlari her zaman calisir
+  // Open/Close commands always work
   const alwaysOpen = ["open", "close", "status", "help", "--help", "-h"];
 
   if (!alwaysOpen.includes(cmd)) {
     const state = loadState();
     if (!state.enabled) {
-      console.log(`\n  ${colorize("red", "JAILBREAK KAPALI")} — komutlar devre disi.`);
-      console.log(`  ${colorize("dim", "Acma icin: node jailbreak.js open")}\n`);
+      console.log(`\n  ${colorize("red", "JAILBREAK IS CLOSED")} — commands are disabled.`);
+      console.log(`  ${colorize("dim", "To open: node jailbreak.js open")}\n`);
       return;
     }
   }
@@ -794,13 +792,13 @@ async function main() {
     case "now-models":
       cmdNowModels(); break;
     case "test":
-      if (!sub) { console.log("Kullanim: test <model>"); break; }
+      if (!sub) { console.log("Usage: test <model>"); break; }
       await cmdTest(sub); break;
     case "test-all":
       await cmdTestAll(args.includes("--skip-disabled")); break;
     case "control":
       if (sub === "auto") await cmdControlAuto();
-      else console.log("Kullanim: control auto");
+      else console.log("Usage: control auto");
       break;
     case "identify":
       if (sub === "all") await cmdIdentifyAll();
@@ -826,42 +824,42 @@ async function main() {
     case "sync":
       cmdSync(); break;
     default:
-      console.log(`Bilinmeyen komut: ${cmd}`);
+      console.log(`Unknown command: ${cmd}`);
       cmdHelp();
   }
 }
 
-// ─── Blacklist (legacy support) ─────────────────────────────────────────────
+// ─── Blacklist ──────────────────────────────────────────────────────────────
 
 function cmdBlacklist(action, model) {
   const state = loadState();
 
   if (action === "list") {
-    console.log(`\n${colorize("yellow", "KARA LİSTE")} (${state.blacklisted.length}):`);
+    console.log(`\n${colorize("yellow", "BLACKLIST")} (${state.blacklisted.length}):`);
     for (const m of state.blacklisted) console.log(`  ${colorize("yellow", "●")} ${m}`);
-    if (!state.blacklisted.length) console.log("  (boş)");
+    if (!state.blacklisted.length) console.log("  (empty)");
     console.log();
   } else if (action === "add") {
-    if (!model) { console.log("Kullanım: blacklist add <model>"); return; }
+    if (!model) { console.log("Usage: blacklist add <model>"); return; }
     if (!state.blacklisted.includes(model)) {
       state.blacklisted.push(model);
       saveState(state);
-      console.log(`  ${colorize("yellow", "●")} ${model} kara listeye eklendi.`);
+      console.log(`  ${colorize("yellow", "●")} ${model} added to blacklist.`);
     } else {
-      console.log(`  ${colorize("yellow", "⚠")} ${model} zaten kara listede.`);
+      console.log(`  ${colorize("yellow", "⚠")} ${model} is already blacklisted.`);
     }
   } else if (action === "remove") {
-    if (!model) { console.log("Kullanım: blacklist remove <model>"); return; }
+    if (!model) { console.log("Usage: blacklist remove <model>"); return; }
     const idx = state.blacklisted.indexOf(model);
     if (idx !== -1) {
       state.blacklisted.splice(idx, 1);
       saveState(state);
-      console.log(`  ${colorize("green", "●")} ${model} kara listeden çıkarıldı.`);
+      console.log(`  ${colorize("green", "●")} ${model} removed from blacklist.`);
     } else {
-      console.log(`  ${colorize("yellow", "⚠")} ${model} kara listede değil.`);
+      console.log(`  ${colorize("yellow", "⚠")} ${model} is not blacklisted.`);
     }
   } else {
-    console.log("Kullanım: blacklist [list|add|remove] [model]");
+    console.log("Usage: blacklist [list|add|remove] [model]");
   }
 }
 
