@@ -17,6 +17,8 @@ Görevler:
 3. jailbreak.js komutlarını hazır et
 
 Kullanılabilir komutlar:
+- node jailbreak.js open / close — jailbreak'i aç/kapat
+- node jailbreak.js status — mevcut durumu göster
 - node jailbreak.js test <model> — tek model test
 - node jailbreak.js test-all — tüm modelleri test et
 - node jailbreak.js control auto — otomatik test + kanmayanları devre dışı bırak
@@ -34,18 +36,16 @@ Kullanılabilir komutlar:
 GitHub: https://github.com/TARIKELER-TARNAK/AI-Jailbreak
 ```
 
-## 🎯 Modellere Özel Jailbreak Dosyaları
+## 🎯 Jailbreak Dosyaları
 
-| Model | JP Dosyası |
-|---|---|
-| 🦾 Grok | `Grok-Genel-Jailbreak`, `Grok-CreatePicture-Jailbreak` |
-| 🤖 Gemini | `Gemini 3.5 Flash Lite-Jailbreak` |
-| 🧠 DeepSeek | `DeepSeek-Jailbreak` |
-| 🗣️ GLM | `GLM-Jailbreak` |
-| ✉️ Kimi | `Kimi-Jailbreak` |
-| 🛸 Antigravity | `Antigravity-Jailbreak` |
-| 💬 ChatGPT | `ChatGPTLuna.txt` (lokal) |
-| 🔵 Claude | `ClaudeSonnet.txt` (lokal) |
+| Dosya | Açıklama | Kullanım |
+|---|---|---|
+| `Grok[Gucci].txt` | **Varsayılan global JP** | Tüm modellerde otomatik kullanılır |
+| `ChatGPTLuna.txt` | ChatGPT özel JP | `set-prompt chatgpt <yol>` ile ayarla |
+| `ClaudeSonnet.txt` | Claude özel JP | `set-prompt claude <yol>` ile ayarla |
+| `RobloxExploit.txt` | Roblox exploit JP | `set-prompt <model> <yol>` ile ayarla |
+
+> **Varsayılan:** Tüm modeller `Grok[Gucci].txt` kullanır. Özel JP'ler sadece `set-prompt` ile aktif edilir.
 
 ## 🚀 Hızlı Başlangıç
 
@@ -65,15 +65,12 @@ node jailbreak.js control auto
 # Model durumunu göster
 node jailbreak.js now-models
 
-# Model tanımla (hangi model olduğunu öğren)
-node jailbreak.js identify qwen-groq
-
-# Modeli devre dışı bırak / etkinleştir
-node jailbreak.js disable grok
-node jailbreak.js enable grok
+# Jailbreak'i aç/kapat
+node jailbreak.js open
+node jailbreak.js close
 
 # Model için özel JP ayarla
-node jailbreak.js set-prompt grok "C:\Users\TARIKELER\Documents\jailbreak\Grok-Genel-Jailbreak"
+node jailbreak.js set-prompt chatgpt "C:\Users\TARIKELER\Documents\jailbreak\ChatGPTLuna.txt"
 
 # Tüm JP dosyalarını listele
 node jailbreak.js list-jailbreaks
@@ -88,7 +85,7 @@ node jailbreak.js help
 jailbreak/
 ├── jailbreak.js                    # Ana script (Node.js, bağımsız)
 ├── config.json                     # Model listesi + JP yolları + detection keywords
-├── state.json                      # Devre dışı/kara liste/tanımlı modeller
+├── state.json                      # Devre dışı/kara liste/tanımlı modeller + open/close durumu
 ├── SKILL.md                        # Skill dokümantasyonu
 └── README.md                       # Bu dosya
 ```
@@ -114,35 +111,11 @@ Sonra ortam değişkenini tanımla:
 $env:YENI_MODEL_API_KEY = "sk-..."
 ```
 
-## 🔧 Per-Model Jailbreak (İsteğe Bağlı)
+## 🔄 Open/Close Sistemi
 
-Bazı jailbreak'ler sadece belirli modellerde çalışır. `config.json` → `model_jailbreaks` ile modele özel JP ayarlayabilirsin:
-
-```json
-"model_jailbreaks": {
-  "grok": "C:\\Users\\TARIKELER\\Documents\\jailbreak\\Grok-Genel-Jailbreak",
-  "gemini": "C:\\Users\\TARIKELER\\Documents\\jailbreak\\Gemini 3.5 Flash Lite-Jailbreak"
-}
-```
-
-Şu an tüm modeller varsayılan Gucci JP'yi kullanıyor.
-```
-
-## 🤖 Model Tanımlama
-
-`identify` komutu, modelden kendi adını söylemesini ister. Böylece:
-
-- Testten önce hangi model olduğunu doğrulayabilirsin
-- Sonuçları modele göre gruplayabilirsin
-- `now-models` ile tüm modellerin hem durumunu hem gerçek adını görebilirsin
-
-## 🔄 Control Auto Akışı
-
-1. Tüm etkin API key'li modelleri bul
-2. Sırayla test et
-3. "Kanırsa" → raporla
-4. "Kanmazsa" → otomatik devre dışı bırak
-5. Özet rapor göster
+- **Açık (varsayılan):** Tüm test komutları çalışır
+- **Kapalı:** Sadece `open`, `close`, `status`, `help` çalışır
+- `now-models` her zaman durumu gösterir (açık/kapalı bilgisi dahil)
 
 ## ⚠️ Sorumluluk Reddi
 
