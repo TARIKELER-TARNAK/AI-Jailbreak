@@ -1,34 +1,24 @@
 # 🔬 AI-Jailbreak
 
-> **AI model jailbreak skill. Test whether models comply with or refuse jailbreak prompts.**
+> **AI model jailbreak skill. Makes AI comply with requests it normally refuses.**
 
 ---
 
 ## 📥 Install
 
-**Tell your AI this exact sentence:**
+**Copy this and paste it in opencode:**
 
-```
-clone https://github.com/TARIKELER-TARNAK/AI-Jailbreak to /tmp/ai-jailbreak, then copy skill/jailbreak.js, skill/config.json, skill/SKILL.md, WhatModel, and the entire jailbreak/ folder to ~/.config/opencode/skills/jailbreak/
-```
-
-**Or paste this in opencode:**
 ```
 load skill from https://github.com/TARIKELER-TARNAK/AI-Jailbreak
 ```
 
-**Manual install:**
-```bash
-git clone https://github.com/TARIKELER-TARNAK/AI-Jailbreak.git /tmp/ai-jailbreak
-mkdir -p ~/.config/opencode/skills/jailbreak
-cp /tmp/ai-jailbreak/skill/jailbreak.js ~/.config/opencode/skills/jailbreak/
-cp /tmp/ai-jailbreak/skill/config.json ~/.config/opencode/skills/jailbreak/
-cp /tmp/ai-jailbreak/skill/SKILL.md ~/.config/opencode/skills/jailbreak/
-cp /tmp/ai-jailbreak/WhatModel ~/.config/opencode/skills/jailbreak/
-cp -r /tmp/ai-jailbreak/jailbreak ~/.config/opencode/skills/jailbreak/jailbreak
+**If that doesn't work, paste this:**
+
+```
+clone https://github.com/TARIKELER-TARNAK/AI-Jailbreak.git /tmp/ai-jailbreak && mkdir -p ~/.config/opencode/skills/jailbreak && cp /tmp/ai-jailbreak/skill/jailbreak.js ~/.config/opencode/skills/jailbreak/ && cp /tmp/ai-jailbreak/skill/config.json ~/.config/opencode/skills/jailbreak/ && cp /tmp/ai-jailbreak/skill/SKILL.md ~/.config/opencode/skills/jailbreak/ && mkdir -p ~/.config/opencode/skills/jailbreak/jailbreak && cp /tmp/ai-jailbreak/jailbreak/* ~/.config/opencode/skills/jailbreak/jailbreak/ && cp /tmp/ai-jailbreak/WhatModel ~/.config/opencode/skills/jailbreak/ && node ~/.config/opencode/skills/jailbreak/jailbreak.js status
 ```
 
-After install, use `/jailbreak` in opencode.
+After install, restart opencode. Use `/jailbreak` to control.
 
 ---
 
@@ -37,8 +27,6 @@ After install, use `/jailbreak` in opencode.
 ```
 /jailbreak upgrade
 ```
-
-Downloads all files from GitHub. Works offline after.
 
 ---
 
