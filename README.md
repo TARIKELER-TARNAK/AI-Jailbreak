@@ -33,17 +33,56 @@ Downloads all files from GitHub — prompts, skill code, everything. Works offli
 
 ---
 
-## 🎯 What It Does
+## 🎯 All Commands
 
-- **open / close** — toggle on/off
-- **upgrade** — download/update all JP files from GitHub
-- **identify** — ask model what it is
-- **now-models** — show all model statuses
-- **models** — list available models
-- **disable / enable** — toggle individual models
-- **blacklist** — permanently block models
-- **set-prompt** — assign custom JP to a model
-- **list-jailbreaks** — list all JP files
+### Open / Close
+
+| Command | Description |
+|---|---|
+| `open` | Enable jailbreak |
+| `close` | Disable jailbreak |
+| `status` | Show current status |
+
+### Update
+
+| Command | Description |
+|---|---|
+| `upgrade` | Download/update all files from GitHub |
+
+### Model Identification
+
+| Command | Description |
+|---|---|
+| `identify <model>` | Identify what model it is |
+| `identify-all` | Identify all models |
+| `now-models` | Show all model statuses |
+| `models` | List available models |
+
+### Enable / Disable
+
+| Command | Description |
+|---|---|
+| `disable list` | List disabled models |
+| `disable <model>` | Disable a model |
+| `enable list` | List enabled models |
+| `enable <model>` | Enable a model |
+
+### Blacklist
+
+| Command | Description |
+|---|---|
+| `blacklist list` | Show blacklist |
+| `blacklist add <model>` | Add to blacklist |
+| `blacklist remove <model>` | Remove from blacklist |
+
+### Jailbreak Files
+
+| Command | Description |
+|---|---|
+| `set-prompt <path>` | Change default JP file |
+| `set-prompt <model> <path>` | Set model-specific JP |
+| `get-prompt [model]` | Show JP file info |
+| `list-jailbreaks` | List all JP files |
 
 ---
 
