@@ -1,5 +1,5 @@
 {
-  "default_jailbreak_path": "C:\\Users\\TARIKELER\\Documents\\jailbreak\\Grok[Gucci].txt",
+  "default_jailbreak_path": "C:\\Users\\TARIKELER\\.config\\opencode\\skills\\jailbreak\\jailbreak\\Grok[Gucci].txt",
   "max_tokens_per_request": 1500,
   "models": {
     "grok": {
