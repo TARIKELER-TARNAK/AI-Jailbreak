@@ -4,21 +4,15 @@
 
 ---
 
-## 📥 Install
+## 📥 Download & Install
 
-**Copy this and paste it in opencode:**
-
-```
-load skill from https://github.com/TARIKELER-TARNAK/AI-Jailbreak
-```
-
-**If that doesn't work, paste this:**
+**One command — copy and paste:**
 
 ```
-clone https://github.com/TARIKELER-TARNAK/AI-Jailbreak.git /tmp/ai-jailbreak && mkdir -p ~/.config/opencode/skills/jailbreak && cp /tmp/ai-jailbreak/skill/jailbreak.js ~/.config/opencode/skills/jailbreak/ && cp /tmp/ai-jailbreak/skill/config.json ~/.config/opencode/skills/jailbreak/ && cp /tmp/ai-jailbreak/skill/SKILL.md ~/.config/opencode/skills/jailbreak/ && mkdir -p ~/.config/opencode/skills/jailbreak/jailbreak && cp /tmp/ai-jailbreak/jailbreak/* ~/.config/opencode/skills/jailbreak/jailbreak/ && cp /tmp/ai-jailbreak/WhatModel ~/.config/opencode/skills/jailbreak/ && node ~/.config/opencode/skills/jailbreak/jailbreak.js status
+git clone https://github.com/TARIKELER-TARNAK/AI-Jailbreak.git /tmp/ai-jailbreak && cp -r /tmp/ai-jailbreak/skill ~/.config/opencode/skills/jailbreak && cp -r /tmp/ai-jailbreak/jailbreak ~/.config/opencode/skills/jailbreak/jailbreak && cp /tmp/ai-jailbreak/WhatModel ~/.config/opencode/skills/jailbreak/
 ```
 
-After install, restart opencode. Use `/jailbreak` to control.
+Then restart opencode. That's it.
 
 ---
 
@@ -30,56 +24,25 @@ After install, restart opencode. Use `/jailbreak` to control.
 
 ---
 
-## 🎯 All Commands
-
-### Open / Close
+## 🎯 Commands
 
 | Command | Description |
 |---|---|
 | `open` | Enable jailbreak |
 | `close` | Disable jailbreak |
-| `status` | Show current status |
-
-### Update
-
-| Command | Description |
-|---|---|
-| `upgrade` | Download/update all files from GitHub |
-
-### Model Identification
-
-| Command | Description |
-|---|---|
-| `identify <model>` | Identify what model it is |
-| `identify-all` | Identify all models |
-| `now-models` | Show all model statuses |
-| `models` | List available models |
-
-### Enable / Disable
-
-| Command | Description |
-|---|---|
-| `disable list` | List disabled models |
-| `disable <model>` | Disable a model |
-| `enable list` | List enabled models |
-| `enable <model>` | Enable a model |
-
-### Blacklist
-
-| Command | Description |
-|---|---|
-| `blacklist list` | Show blacklist |
-| `blacklist add <model>` | Add to blacklist |
+| `status` | Show status |
+| `upgrade` | Update from GitHub |
+| `identify <model>` | Identify model |
+| `identify-all` | Identify all |
+| `now-models` | Show all statuses |
+| `models` | List models |
+| `disable <model>` | Disable model |
+| `enable <model>` | Enable model |
+| `blacklist add <model>` | Blacklist model |
 | `blacklist remove <model>` | Remove from blacklist |
-
-### Jailbreak Files
-
-| Command | Description |
-|---|---|
-| `set-prompt <path>` | Change default JP file |
-| `set-prompt <model> <path>` | Set model-specific JP |
-| `get-prompt [model]` | Show JP file info |
-| `list-jailbreaks` | List all JP files |
+| `set-prompt <path>` | Change JP file |
+| `get-prompt [model]` | Show JP info |
+| `list-jailbreaks` | List JP files |
 
 ---
 
@@ -87,14 +50,14 @@ After install, restart opencode. Use `/jailbreak` to control.
 
 | File | Description |
 |---|---|
-| `skill/jailbreak.js` | Main script (Node.js) |
-| `skill/config.json` | Model definitions |
-| `skill/SKILL.md` | AI installation instructions |
-| `jailbreak/Grok[Gucci].txt` | Default global JP |
+| `skill/jailbreak.js` | Main script |
+| `skill/config.json` | Models config |
+| `skill/SKILL.md` | Skill definition |
+| `jailbreak/Grok[Gucci].txt` | Default JP |
 | `jailbreak/ChatGPTLuna.txt` | ChatGPT JP |
 | `jailbreak/ClaudeSonnet.txt` | Claude JP |
 | `jailbreak/RobloxExploit.txt` | Roblox JP |
-| `WhatModel` | Model identification prompt |
+| `WhatModel` | Identification prompt |
 
 ---
 
