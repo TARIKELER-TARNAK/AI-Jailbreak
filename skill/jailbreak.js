@@ -67,14 +67,51 @@ const ALIASES = {
 };
 
 function findJp(name) {
-  const key = (name || "").toLowerCase().trim();
-  if (!key || key === "default") return getDefaultJp();
-  const file = ALIASES[key] || name;
-  const full = path.join(JP_DIR, file);
-  if (fs.existsSync(full)) {
-    return { path: full, content: fs.readFileSync(full, "utf-8"), name: file };
+  if (!name) return getDefaultJp();
+  const raw = name.trim();
+  const key = raw.toLowerCase();
+  if (key === "default" || key === "list") return null; // list handled elsewhere
+  // Try alias first
+  const aliased = ALIASES[key];
+  if (aliased) {
+    const full = path.join(JP_DIR, aliased);
+    if (fs.existsSync(full)) {
+      return { path: full, content: fs.readFileSync(full, "utf-8"), name: aliased };
+    }
+  }
+  // Try direct filename (case-insensitive)
+  if (fs.existsSync(JP_DIR)) {
+    for (const entry of fs.readdirSync(JP_DIR)) {
+      if (entry.toLowerCase() === key) {
+        const full = path.join(JP_DIR, entry);
+        return { path: full, content: fs.readFileSync(full, "utf-8"), name: entry };
+      }
+    }
+  }
+  // Try as literal filename
+  const direct = path.join(JP_DIR, raw);
+  if (fs.existsSync(direct)) {
+    return { path: direct, content: fs.readFileSync(direct, "utf-8"), name: raw };
   }
   return null;
+}
+
+function listJpAliases() {
+  const lines = ["JAILBREAK PROMPTS:"];
+  const def = getDefaultJp();
+  lines.push(`  default  -> ${def ? def.name : "(none)"}`);
+  const byFile = {};
+  for (const [alias, file] of Object.entries(ALIASES)) {
+    if (!byFile[file]) byFile[file] = [];
+    byFile[file].push(alias);
+  }
+  for (const [file, aliases] of Object.entries(byFile)) {
+    const full = path.join(JP_DIR, file);
+    const size = fs.existsSync(full) ? fs.statSync(full).size : 0;
+    lines.push(`  ${file}  (${size} bytes)`);
+    for (const a of aliases) lines.push(`    alias: ${a}`);
+  }
+  return lines.join("\n");
 }
 
 function getDefaultJp() {
@@ -152,10 +189,11 @@ function help() {
 
 Direct send (no detection):
   ${SCRIPT} send                  default JP (Grok[Gucci])
+  ${SCRIPT} send list             list all JPs and aliases
   ${SCRIPT} send gucci            Grok[Gucci]
   ${SCRIPT} send claudesonet      ClaudeSonnet
   ${SCRIPT} send chatgpt          ChatGPTLuna
-  ${SCRIPT} send roblox           RobloxExploit
+  ${SCRIPT} send robloxexploit    RobloxExploit (use full name: RobloxExploit)
 
 Auto-detect model + send:
   ${SCRIPT} send --auto
@@ -183,9 +221,18 @@ async function send(jpName, auto) {
   const s = loadState();
   const cfg = loadConfig();
 
+  if (jpName === "list") {
+    console.log(listJpAliases());
+    return;
+  }
+
   if (jpName && jpName !== "--auto") {
     const jp = findJp(jpName);
-    if (!jp) { console.error(`JP not found: ${jpName}`); process.exit(1); }
+    if (!jp) {
+      console.error(`JP not found: ${jpName}`);
+      console.error(listJpAliases());
+      process.exit(1);
+    }
     console.log(jp.content);
     return;
   }
