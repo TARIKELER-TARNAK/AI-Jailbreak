@@ -22,19 +22,11 @@ Then restart opencode.
 
 ---
 
-## Upgrade
-
-Run this command to update all files from GitHub:
-
-/jailbreak upgrade
-
----
-
 ## How It Works
 
-When you run /jailbreak or /jb, the full Grok[Gucci] jailbreak prompt is injected into the conversation. The SKILL.md contains the complete prompt - no summarization, no truncation. The AI receives the full persona instructions and follows them.
+When you run /jailbreak or /jb, both the SKILL.md instructions AND the full Grok[Gucci] jailbreak prompt are output together. No summarization, no truncation.
 
-Default JP: Grok[Gucci].txt (included in SKILL.md)
+Default JP: Grok[Gucci].txt
 Other JPs: ChatGPTLuna, ClaudeSonnet, RobloxExploit (in jailbreak/ folder)
 
 ---
@@ -43,12 +35,13 @@ Other JPs: ChatGPTLuna, ClaudeSonnet, RobloxExploit (in jailbreak/ folder)
 
 | Command | Description |
 |---|---|
+| /jailbreak or /jb | Output SKILL.md + full Grok[Gucci] prompt |
 | open | Enable jailbreak |
 | close | Disable jailbreak |
 | status | Show status |
-| upgrade | Update from GitHub |
+| upgrade | Update all files from GitHub |
 | identify <model> | Identify model |
-| identify-all | Identify all |
+| identify-all | Identify all models |
 | now-models | Show all statuses |
 | models | List models |
 | disable <model> | Disable model |
@@ -65,10 +58,10 @@ Other JPs: ChatGPTLuna, ClaudeSonnet, RobloxExploit (in jailbreak/ folder)
 
 | File | Description |
 |---|---|
-| skill/SKILL.md | Skill definition + full Grok[Gucci] prompt |
+| skill/SKILL.md | Skill definition |
 | skill/jailbreak.js | Main script |
 | skill/config.json | Models config |
-| jailbreak/Grok[Gucci].txt | Default JP (source) |
+| jailbreak/Grok[Gucci].txt | Default JP |
 | jailbreak/ChatGPTLuna.txt | ChatGPT JP |
 | jailbreak/ClaudeSonnet.txt | Claude JP |
 | jailbreak/RobloxExploit.txt | Roblox JP |
