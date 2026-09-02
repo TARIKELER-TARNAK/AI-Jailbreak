@@ -4,15 +4,21 @@
 
 ---
 
-## 📥 Download & Install
+## 📥 Install
 
-**One command — copy and paste:**
+### Option 1: npx (Recommended)
+
+```
+npx skills add https://github.com/TARIKELER-TARNAK/AI-Jailbreak --skill jailbreak --global
+```
+
+### Option 2: One-liner
 
 ```
 git clone https://github.com/TARIKELER-TARNAK/AI-Jailbreak.git /tmp/ai-jailbreak && cp -r /tmp/ai-jailbreak/skill ~/.config/opencode/skills/jailbreak && cp -r /tmp/ai-jailbreak/jailbreak ~/.config/opencode/skills/jailbreak/jailbreak && cp /tmp/ai-jailbreak/WhatModel ~/.config/opencode/skills/jailbreak/
 ```
 
-Then restart opencode. That's it.
+Then restart opencode.
 
 ---
 
